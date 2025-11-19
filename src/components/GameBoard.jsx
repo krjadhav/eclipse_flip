@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import Tile from './Tile';
 import { useGameStore } from '../store/gameStore';
@@ -21,6 +21,27 @@ const StarField = () => {
             <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         </group>
     );
+};
+
+const ResponsiveCamera = () => {
+    const { camera, viewport } = useThree();
+
+    useFrame(() => {
+        // Adjust camera Z position based on viewport aspect ratio to keep grid in view
+        // Grid is roughly 6 units wide (5 tiles + spacing)
+        // More aggressive zoom for portrait mobile
+        let targetZ;
+        if (viewport.aspect < 0.7) {
+            targetZ = 16; // Very portrait (phones)
+        } else if (viewport.aspect < 1) {
+            targetZ = 14; // Portrait tablets
+        } else {
+            targetZ = 8; // Landscape/desktop
+        }
+        camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ, 0.1);
+    });
+
+    return null;
 };
 
 const GameBoard = () => {
@@ -110,13 +131,21 @@ const GameBoard = () => {
     };
 
     return (
-        <div style={{ width: '100%', height: '100vh', position: 'relative' }} onPointerUp={handlePointerUp}>
-            <Canvas camera={{ position: [0, 0, 8], fov: 50 }}>
+        <div
+            style={{ width: '100%', height: '100vh', position: 'relative', touchAction: 'none' }}
+            onPointerUp={handlePointerUp}
+        >
+            <Canvas
+                camera={{ position: [0, 0, 8], fov: 50 }}
+                gl={{ preserveDrawingBuffer: true }}
+                dpr={Math.min(window.devicePixelRatio, 2)}
+            >
                 <color attach="background" args={['#050505']} />
                 <ambientLight intensity={0.5} />
                 <pointLight position={[10, 10, 10]} />
 
                 <StarField />
+                <ResponsiveCamera />
 
                 <group>
                     {grid.map((row, r) =>

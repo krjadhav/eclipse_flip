@@ -13,21 +13,42 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 body {
   margin: 0;
   display: flex;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   background: #050505; /* Deep black for space theme */
   overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
 }
 
 #root {
   width: 100%;
   height: 100vh;
+  height: -webkit-fill-available;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+html {
+  height: -webkit-fill-available;
+}
+
+@media (max-width: 768px) {
+  #root {
+    overflow: hidden;
+  }
 }
